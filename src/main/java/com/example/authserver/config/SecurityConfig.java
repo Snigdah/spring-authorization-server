@@ -29,11 +29,15 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.UUID;
 
 @Configuration
@@ -50,6 +54,7 @@ public class SecurityConfig {
 
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .cors(Customizer.withDefaults())
                 .with(authorizationServerConfigurer, (authorizationServer) ->
                         authorizationServer
                                 .oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
@@ -69,20 +74,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Bean
-//    @Order(1)
-//    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
-//        // Apply Authorization Server configuration
-//        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-//                new OAuth2AuthorizationServerConfigurer();
-//        http.apply(authorizationServerConfigurer);
-//
-//        // Optional: default login page
-//        http.formLogin(Customizer.withDefaults());
-//
-//        return http.build();
-//    }
 
     // Default security chain for all other endpoints
     @Bean
@@ -121,7 +112,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // public client
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:3000/callback")
+                .redirectUri("https://oidcdebugger.com/debug")
                 .scope("openid")
                 .scope("api.read")
                 .clientSettings(ClientSettings.builder()
@@ -187,5 +178,30 @@ public class SecurityConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of(
+                "https://oidcdebugger.com",
+                "https://oauthdebugger.com",
+                "http://localhost:3000"
+        ));
+
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "OPTIONS"
+        ));
+
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/oauth2/**", config);
+
+        return source;
     }
 }
