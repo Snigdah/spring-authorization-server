@@ -32,6 +32,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Form login handles the redirect to the login page from the
@@ -44,21 +45,18 @@ public class SecurityConfig {
 
 
 //    @Bean
-//    public UserDetailsService users() {
-//        // Create one test user
-//        UserDetails user = User.withDefaultPasswordEncoder()
-//                .username("user")   // login username
-//                .password("password") // login password
-//                .roles("USER")      // role
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
+//    public AuthorizationServerSettings authorizationServerSettings() {
+//        return AuthorizationServerSettings.builder().build();
 //    }
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+        return AuthorizationServerSettings.builder()
+                .issuer("http://localhost:8080")
+                .build();
     }
 
+    // CORS configuration for OIDC / OAuth2 endpoints
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -66,24 +64,18 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "https://oidcdebugger.com",
                 "https://oauthdebugger.com",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "http://localhost:5173" // add your React/Vite dev server
         ));
-
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "OPTIONS"
-        ));
-
+        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true); // must be true for browser to send cookies
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/oauth2/**", config);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
 
         return source;
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(
