@@ -30,7 +30,7 @@ public class RegisteredClientConfig {
                 .redirectUri("https://oidcdebugger.com/debug")
                 .scope("openid")
                 .scope("api.read")
-                .scope("offline_access")
+//                .scope("offline_access")
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
                         .refreshTokenTimeToLive(Duration.ofDays(30))

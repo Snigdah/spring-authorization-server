@@ -29,12 +29,13 @@ public class TokenCustomizerConfig {
         jwtGenerator.setJwtCustomizer(tokenCustomizer);  // ✅ Custom Claims
 
         OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
-        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        //OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
 
         return new DelegatingOAuth2TokenGenerator(
                 jwtGenerator,
                 accessTokenGenerator,
-                refreshTokenGenerator
+               new OAuth2PublicClientRefreshTokenGenerator()
+               // refreshTokenGenerator
         );
     }
 
