@@ -29,7 +29,7 @@ public class RegistrationService {
         user.setPhoneNumber(request.phone());
         user.setEmail(request.email());
         user.setOrgId(request.ordId());
-        user.setRoles("ROLE_USER");
+        user.setRoles("USER");
 
         userRepository.save(user);
     }
